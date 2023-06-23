@@ -57,6 +57,15 @@ proto_gsksrvr.experts = {
 	proto_gsksrvr_expert
 }
 
+local _2cutc_extension = Field.new("2cutc.extension")
+
+--[[
+The 2cUTC extension provided for the GSKSRVR component:
+
+       00   01    02  03  04  05  06  07  08  09  0A    0B  0C  0D  0E  0F  ..  ..  
+0000   command padded by blanks...................
+]]
+
 --DISSECTOR
 --DISSECTOR
 --DISSECTOR
@@ -69,6 +78,12 @@ function proto_gsksrvr.dissector(buffer, pinfo, tree)
 	pinfo.cols.protocol = proto_gsksrvr.name
 
     local subtree = tree:add(proto_gsksrvr, buffer)
+
+	-- get 2cUTC derived information from higher up
+	local extension = _2cutc_extension().range
+
+	local command = string.gsub(extension:string(), "^%s*(.-)%s*$", "%1")
+	pinfo.cols.info:append(" " .. command)
 
 	-- CTRACE begin length field
 	local ctrace_len = buffer(0, 2):uint()

@@ -35,6 +35,7 @@ local _2cutc_component = Field.new("2cutc.component")
 local _2cutc_extension = Field.new("2cutc.extension")
 
 -- any fields from SYSOMVS?
+-- remember to check any one of these for "nil" in the post-dissector
 
 register_postdissector(proto_sysomvs_post)
 
