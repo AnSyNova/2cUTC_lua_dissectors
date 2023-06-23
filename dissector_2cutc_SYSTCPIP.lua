@@ -92,7 +92,7 @@ function proto_systcpip.dissector(buffer, pinfo, tree)
 
 	local flag = extension(0, 1):string()
 	local option = string.gsub(extension(2, 8):string(), "^%s*(.-)%s*$", "%1")
-	local description = string.gsub(string.lower(extension(11, 32):string()), "^%s*(.-)%s*$", "%1")
+	local description = string.gsub(string.lower(extension(11):string()), "^%s*(.-)%s*$", "%1")
 
 	if flag == "!" then
 		subtree:add_proto_expert_info(proto_systcpip_expert, "ENTID indicates error")
