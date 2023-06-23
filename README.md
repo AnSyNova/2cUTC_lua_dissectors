@@ -6,7 +6,7 @@ A set of Wireshark .lua scripts to dissect 2cUTC CTRACEs
 
 _FIRST_
 
-copy these luas to C:\Users\<username>\AppData\Roaming\Wireshark\plugins
+copy these luas to `C:\Users\<username>\AppData\Roaming\Wireshark\plugins`
 
 _THEN EITHER_
 
