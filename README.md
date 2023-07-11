@@ -12,6 +12,16 @@ If you want to know more about AnSyNova GmbH: [https://www.ansynova.com/](https:
 
 You need Wireshark on your PC. Your goal is to analyze .pcapng trace files produced by 2cUTC on this PC or from somewhere else, which contain exported CTRACEs.
 
+**PREPARATION**
+
+To get these dissectors onto your PC:
+
+Use the CODE button **Download ZIP**, or clone the repo onto a location on your PC (you could even choose the Wireshark plugins folder as that location, to avoid needing a copy operation). 
+
+_OR_
+
+If you intend to contribute to these dissectors or suggest modifications via pull requests, consider forking this repo to your own user and then clone that one instead. 
+
 **INSTALL**
 
 For these dissectors to be active in Wireshark,
@@ -37,6 +47,10 @@ create (or edit) a file "`user_dlts`" in your wirshark profile and create (or ad
 _and FINALLY_
 
 bring up Wireshark.
+
+**ISSUES**
+
+If you encounter difficulties, bugs or have suggestions, you can open issues in this repo.
 
 **EXAMPLE COLORING RULE**
 
