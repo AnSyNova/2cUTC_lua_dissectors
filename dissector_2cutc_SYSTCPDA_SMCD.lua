@@ -22,13 +22,21 @@
 --INIT
 
 -- SYSTCPDA_SMCD
-local proto_systcpda_smcd = Proto("systcpda_smcd", "Option SMCD")
+local proto_systcpda_smcd = Proto("systcpda_smcd", "SMCD Extension")
 
 -- Fields that you can use in filters and coloring rules:
-local systcpda_smcd_data = ProtoField.bytes("systcpda_smcd.data", "Data")
+local systcpda_smcd_common_header = ProtoField.bytes("systcpda_smcd.common_header", "SYSTCPDA common header")
+local systcpda_smcd_extension_length = ProtoField.bytes("systcpda_smcd.extension_length", "SMCD extension length")
+local systcpda_smcd_extension_type = ProtoField.bytes("systcpda_smcd.extension_type", "SMCD extension type")
+local systcpda_smcd_extension_header = ProtoField.bytes("systcpda_smcd.extension_header", "SMCD extension header")
+local systcpda_smcd_payload = ProtoField.bytes("systcpda_smcd.payload", "SMCD payload")
 
 proto_systcpda_smcd.fields = {  
-	systcpda_smcd_data
+    systcpda_smcd_common_header,
+    systcpda_smcd_extension_length,
+    systcpda_smcd_extension_type,
+    systcpda_smcd_extension_header,
+    systcpda_smcd_payload
 }
 
 --DISSECTOR
@@ -44,5 +52,15 @@ function proto_systcpda_smcd.dissector(buffer, pinfo, tree)
 
 	-- dissect
 	-- add to subtree here
-	subtree:add(systcpda_smcd_data, buffer(0))
+	subtree:add(systcpda_smcd_common_header, buffer(0, 106))
+
+    subtree:add(systcpda_smcd_extension_length, buffer(106, 2))
+
+    subtree:add(systcpda_smcd_extension_type, buffer(108, 2))
+
+    local extension_length = buffer(106, 2):uint() - 4
+
+    subtree:add(systcpda_smcd_extension_header, buffer(110, extension_length))
+
+    subtree:add(systcpda_smcd_payload, buffer(110 + extension_length))
 end

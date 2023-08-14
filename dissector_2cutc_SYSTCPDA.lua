@@ -60,9 +60,11 @@ function proto_systcpda.dissector(buffer, pinfo, tree)
 	-- get 2cUTC derived information from higher up
 	local extension = _2cutc_extension().range
 
-	local extension_type = string.gsub(string.lower(extension:string()), "^%s*(.-)%s*$", "%1")
+	local extension_type = extension:string()
 
 	subtree:add(systcpda_type, extension_type)
+
+	extension_type = string.gsub(string.lower(extension_type), "^%s*(.-)%s*$", "%1")
 
 	-- CTRACE begin length field
 	local ctrace_len = buffer(0, 2):uint()
@@ -71,7 +73,6 @@ function proto_systcpda.dissector(buffer, pinfo, tree)
 	-- see above, special data inserted by 2cUTC
 	pinfo.cols.info:append(" " .. extension_type)
 	if extension_type == "smcd" then
-		print("blabla")
 		Dissector.get("systcpda_smcd"):call(buffer(2, ctrace_len - 4):tvb(), pinfo, subtree)
 	else
 		-- dissect
