@@ -27,11 +27,38 @@ local proto_systcpda = Proto("systcpda", "Component SYSTCPDA")
 -- Fields that you can use in filters and coloring rules:
 local systcpda_type = ProtoField.string("systcpda.type", "Type")
 local systcpda_len = ProtoField.uint16("systcpda.len", "Length")
-local systcpda_data = ProtoField.bytes("systcpda.data", "Data")
+local systcpda_common_header = ProtoField.bytes("systcpda.common_header", "Common Header")
+
+local systcpda_asid = ProtoField.uint16("systcpda.asid", "ASID", base.HEX)
+local systcpda_entid = ProtoField.uint32("systcpda.entid","Entry ID", base.HEX)
+local systcpda_tod = ProtoField.uint64("systcpda.tod", "TimeofDay", base.HEX)
+local systcpda_linkname = ProtoField.string("systcpda.linkname", "Interface")
+local systcpda_tod2 = ProtoField.uint64("systcpda.tod2", "TimeofDay#2", base.HEX)
+local systcpda_src = ProtoField.uint32("systcpda.src", "Source IP ", base.HEX)
+local systcpda_dst = ProtoField.uint32("systcpda.dst", "Destination IP ", base.HEX)
+local systcpda_srcport = ProtoField.uint16("systcpda.srcport", "Source Port")
+local systcpda_dstport = ProtoField.uint16("systcpda.dstport", "Destination Port")
+local systcpda_vlanid = ProtoField.uint16("v.vlanid", "VLAN ID")
+
+
+local systcpda_extension = ProtoField.bytes("systcpda.extension", "Extension")
 
 proto_systcpda.fields = {  
 	systcpda_type,
 	systcpda_len,
+	systcpda_common_header,
+
+	systcpda_asid,
+	systcpda_entid,
+	systcpda_tod,
+	systcpda_linkname,
+    systcpda_tod2,
+    systcpda_src,
+    systcpda_dst,
+	systcpda_srcport,
+	systcpda_dstport,
+	systcpda_vlanid,
+
 	systcpda_data
 }
 
@@ -69,15 +96,28 @@ function proto_systcpda.dissector(buffer, pinfo, tree)
 	-- CTRACE begin length field
 	local ctrace_len = buffer(0, 2):uint()
 	subtree:add(systcpda_len, buffer(0, 2))
-	
+
+	subtree:add(systcpda_common_header, buffer(2, 106))
+
+	subtree:add(systcpda_asid, buffer(2, 2))
+	subtree:add(systcpda_entid, buffer(4, 4))
+	subtree:add(systcpda_tod, buffer(8, 8))
+	subtree:add_packet_field(systcpda_linkname, buffer:range(24, 16), ENC_EBCDIC)
+	subtree:add(systcpda_tod2, buffer(40, 8))
+    subtree:add(systcpda_src, buffer(60, 4))
+    subtree:add(systcpda_dst, buffer(76, 4))
+	subtree:add(systcpda_srcport, buffer(80, 2))
+    subtree:add(systcpda_dstport, buffer(82, 2))
+    subtree:add(systcpda_vlanid, buffer(90, 2))
+
 	-- see above, special data inserted by 2cUTC
 	pinfo.cols.info:append(" " .. extension_type)
-	if extension_type == "smcd" then
-		Dissector.get("systcpda_smcd"):call(buffer(2, ctrace_len - 4):tvb(), pinfo, subtree)
+	if extension_type == "smc" then
+		Dissector.get("systcpda_smc"):call(buffer(108, ctrace_len - 108 - 4):tvb(), pinfo, subtree)
 	else
 		-- dissect
 		-- add to subtree here
-		subtree:add(systcpda_data, buffer(2, ctrace_len - 4))
+		subtree:add(systcpda_extension, buffer(108, ctrace_len - 108 - 4))
 	end
 
 	-- CTRACE end length field
