@@ -38,9 +38,16 @@ local systcpda_srcip = ProtoField.uint32("systcpda.srcip", "Source IP ", base.HE
 local systcpda_dstip = ProtoField.uint32("systcpda.dstip", "Destination IP ", base.HEX)
 local systcpda_srcport = ProtoField.uint16("systcpda.srcport", "Source Port")
 local systcpda_dstport = ProtoField.uint16("systcpda.dstport", "Destination Port")
-local systcpda_vlanid = ProtoField.uint16("v.vlanid", "VLAN ID")
+local systcpda_recnum = ProtoField.uint16("systcpda.recnum", "Record number")
+local systcpda_vlanid = ProtoField.uint16("systcpda.vlanid", "VLAN ID")
+local systcpda_intfidx = ProtoField.uint32("systcpda.intfidx", "Interface index")
 
+local systcpda_extensiontype = ProtoField.bytes("systcpda.extensiontype", "Extension type")
 local systcpda_extension = ProtoField.bytes("systcpda.extension", "Extension")
+local systcpda_extensionlen = ProtoField.uint16("systcpda.extensionlen", "Extension length")
+
+local systcpda_payload = ProtoField.bytes("systcpda.payload", "Payload")
+local systcpda_payloadlen = ProtoField.uint32("systcpda.payloadlen", "Payload length")
 
 proto_systcpda.fields = {  
 	systcpda_type,
@@ -56,9 +63,16 @@ proto_systcpda.fields = {
     systcpda_dstip,
 	systcpda_srcport,
 	systcpda_dstport,
+	systcpda_recnum,
 	systcpda_vlanid,
+	systcpda_intfidx,
 
-	systcpda_extension
+	systcpda_extensiontype,
+	systcpda_extensionlen,
+	systcpda_extension,
+
+	systcpda_payloadlen,
+	systcpda_payload
 }
 
 local _2cutc_extension = Field.new("2cutc.extension")
@@ -93,7 +107,7 @@ function proto_systcpda.dissector(buffer, pinfo, tree)
 	local ctrace_len = buffer(0, 2):uint()
 	subtree:add(systcpda_len, buffer(0, 2))
 
-	-- Show the common header as a big block
+	-- Show the common header as a big block (if desired)
 	-- subtree:add(systcpda_common_header, buffer(2, 106))
 
 	-- Dissect the common_header
@@ -110,15 +124,21 @@ function proto_systcpda.dissector(buffer, pinfo, tree)
     subtree:add(systcpda_dstip, buffer(76, 4))
 	subtree:add(systcpda_srcport, buffer(80, 2))
     subtree:add(systcpda_dstport, buffer(82, 2))
+    subtree:add(systcpda_recnum, buffer(84, 4))
     subtree:add(systcpda_vlanid, buffer(90, 2))
+    subtree:add(systcpda_payloadlen, buffer(96, 4))
+    subtree:add(systcpda_intfidx, buffer(100, 4))
+    subtree:add(systcpda_extensionlen, buffer(108, 2))
+    subtree:add(systcpda_extensiontype, buffer(110, 2))
 
 	-- see above, special data inserted by 2cUTC
-	pinfo.cols.info:append(" " .. extension_type)
+	pinfo.cols.info:append(" " .. string.upper(extension_type))
 	if extension_type == "smc" then
-		Dissector.get("systcpda_smc"):call(buffer(108, ctrace_len - 108 - 4):tvb(), pinfo, subtree)
+		Dissector.get("systcpda_smc"):call(buffer(112, ctrace_len - 112):tvb(), pinfo, subtree)
 	else
 		subtree:add("Unknown extension type, cannot dissect:")
-		subtree:add(systcpda_extension, buffer(108, ctrace_len - 108 - 4))
+		subtree:add(systcpda_extension, buffer(112, ctrace_len - 112))
+		subtree:add(systcpda_payload, buffer(112, ctrace_len - 112))
 	end
 
 	-- CTRACE end length field

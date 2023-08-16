@@ -25,9 +25,7 @@
 local proto_systcpda_smc = Proto("systcpda_smc", "SMC Extension")
 
 -- Fields that you can use in filters and coloring rules:
-local systcpda_smc_extension_length = ProtoField.bytes("systcpda_smc.extension_length", "Extension length")
-local systcpda_smc_extension_type = ProtoField.bytes("systcpda_smc.extension_type", "Extension type")
-local systcpda_smc_extension_header = ProtoField.bytes("systcpda_smc.extension_header", "Extension header")
+local systcpda_smc_extension_header = ProtoField.bytes("systcpda_smc.extension_header", "**Extension header")
 
 local systcpda_smc_con_lcl = ProtoField.uint32("systcpda_smc.con_lcl", "Local ConnID", base.HEX)
 local systcpda_smc_con_rmt = ProtoField.uint32("systcpda_smc.con_rmt", "Remote ConnID", base.HEX)
@@ -36,7 +34,7 @@ local systcpda_smc_grp_rmt = ProtoField.uint64("systcpda_smc.grp_rmt", "Remote G
 local systcpda_smc_qp_lcl = ProtoField.uint24("systcpda_smc.qp_lcl", "Local QueuePair", base.HEX)
 local systcpda_smc_qp_rmt = ProtoField.uint24("systcpda_smc.qp_rmt", "Remote QueuePair", base.HEX)
 
-local systcpda_smc_payload = ProtoField.bytes("systcpda_smc.payload", "Payload")
+local systcpda_smc_payload = ProtoField.bytes("systcpda_smc.payload", "**Payload")
 
 local systcpda_smc_llc_func = ProtoField.uint8("systcpda_smc.llc_func", "LLC Function")
 local systcpda_smc_llc_len = ProtoField.uint16("systcpda_smc.llc_len", "LLC length")
@@ -65,6 +63,11 @@ proto_systcpda_smc.fields = {
     systcpda_smc_llc_rsncd
 }
 
+-- setup getting the SYSTCPDA fields that we need from the SYSTCPDA dissector (that called us)
+local systcpda_extensionlen = Field.new("systcpda.extensionlen")
+local systcpda_payloadlen = Field.new("systcpda.payloadlen")
+local systcpda_entid = Field.new("systcpda.entid")
+
 --DISSECTOR
 --DISSECTOR
 --DISSECTOR
@@ -76,34 +79,34 @@ function proto_systcpda_smc.dissector(buffer, pinfo, tree)
 	
 	local subtree = tree:add(proto_systcpda_smc, buffer)
 
+    local extension_length = systcpda_extensionlen().value - 4
+    local payload_length = systcpda_payloadlen().value
+
 	-- dissect
 	-- add to subtree here
-    subtree:add(systcpda_smc_extension_length, buffer(0, 2))
 
-    subtree:add(systcpda_smc_extension_type, buffer(2, 2))
-
-    local extension_length = buffer(0, 2):uint() - 4
-
-   	-- Show the smc_extension_header as a big block (if desired)
-    -- subtree:add(systcpda_smc_extension_header, buffer(4, extension_length))
+    -- Show the smc_extension_header as a big block (if desired)
+    subtree:add(systcpda_smc_extension_header, buffer(0, extension_length))
 
     -- Dissect the smc_extension_header
-    subtree:add(systcpda_smc_con_lcl, buffer(40, 4))
-    subtree:add(systcpda_smc_con_rmt, buffer(44, 4))
-    subtree:add(systcpda_smc_grp_lcl, buffer(64, 8))
-    subtree:add(systcpda_smc_grp_rmt, buffer(48, 8))
-    subtree:add(systcpda_smc_qp_lcl, buffer(83, 3))
-    subtree:add(systcpda_smc_qp_rmt, buffer(80, 3))
+    subtree:add(systcpda_smc_con_lcl, buffer(32, 4))
+    subtree:add(systcpda_smc_con_rmt, buffer(36, 4))
+    subtree:add(systcpda_smc_grp_lcl, buffer(56, 8))
+    subtree:add(systcpda_smc_grp_rmt, buffer(40, 8))
+    subtree:add(systcpda_smc_qp_lcl, buffer(75, 3))
+    subtree:add(systcpda_smc_qp_rmt, buffer(72, 3))
 
    	-- Show the smc_payload as a big block (if desired)
-    subtree:add(systcpda_smc_payload, buffer(4 + extension_length))
+    subtree:add(systcpda_smc_payload, buffer(extension_length, payload_length))
 
     -- Dissect the smc_payload
-    local payload = buffer(4 + extension_length)
+    local payload = buffer( extension_length)
 
     subtree:add(systcpda_smc_llc_func, payload(0, 1))
     subtree:add(systcpda_smc_llc_len, payload(1, 2))
     subtree:add(systcpda_smc_llc_flg, payload(3, 1))
     subtree:add(systcpda_smc_llc_lnkid, payload(4, 1))
     subtree:add(systcpda_smc_llc_rsncd, payload(5, 4))
+
+    
 end
