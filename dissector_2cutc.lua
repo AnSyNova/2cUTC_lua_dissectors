@@ -31,6 +31,12 @@
 -- Top level: 2cUTC
 local proto_2cutc = Proto("2cutc", "2cUTC Trace Conversion")
 
+local proto_2cutc_settings = {
+	strict = false
+}
+
+proto_2cutc.prefs.strict = Pref.bool("Strict CTRACE Length validation", proto_2cutc_settings.strict, "Whether to write check being/end length values")
+
 -- Fields that you can use in filters and coloring rules:
 local _2cutc_eyecatcher = ProtoField.string("2cutc.eyecatcher", "Eyecatcher")
 local _2cutc_xlen = ProtoField.uint16("2cutc.xlen", "Extension length")
@@ -100,7 +106,7 @@ function proto_2cutc.dissector(buffer, pinfo, tree)
 	end
 
 	-- check buffer for validity
-	strict = false
+	local strict = proto_2cutc.prefs.strict
 	local err_text = ""
 	local ctrace_len1 = buffer(16 + effxlen, 2):uint()
 	if 16 + effxlen + ctrace_len1 > length then
