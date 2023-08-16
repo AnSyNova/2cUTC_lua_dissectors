@@ -76,6 +76,8 @@ local systcpda_entid = Field.new("systcpda.entid")
 function proto_systcpda_smc.dissector(buffer, pinfo, tree)
 	length = buffer:len()
 	if length == 0 then return end
+
+    pinfo.cols.protocol = proto_systcpda_smc.name
 	
 	local subtree = tree:add(proto_systcpda_smc, buffer)
 
