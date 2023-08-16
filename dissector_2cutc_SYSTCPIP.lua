@@ -85,7 +85,7 @@ function proto_systcpip.dissector(buffer, pinfo, tree)
 	
 	pinfo.cols.protocol = proto_systcpip.name
 
-    local subtree = tree:add(proto_systcpip, buffer)
+    local subtree = tree:add(proto_systcpip, buffer())
 
 	-- get 2cUTC derived information from higher up
 	local extension = _2cutc_extension().range

@@ -66,7 +66,7 @@ function proto_systcpip_tcp.dissector(buffer, pinfo, tree)
 	
 	pinfo.cols.protocol = proto_systcpip_tcp.name
 
-    local subtree = tree:add(proto_systcpip_tcp, buffer)
+    local subtree = tree:add(proto_systcpip_tcp, buffer())
 
 	-- dissect
 	-- add to subtree here

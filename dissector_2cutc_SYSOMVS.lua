@@ -44,7 +44,7 @@ function proto_sysomvs.dissector(buffer, pinfo, tree)
 	
 	pinfo.cols.protocol = proto_sysomvs.name
 
-    local subtree = tree:add(proto_sysomvs, buffer)
+    local subtree = tree:add(proto_sysomvs, buffer())
 
 	-- CTRACE begin length field
 	local ctrace_len = buffer(0, 2):uint()

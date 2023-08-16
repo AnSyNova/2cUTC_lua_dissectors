@@ -79,7 +79,7 @@ function proto_systcpda_smc.dissector(buffer, pinfo, tree)
 
     pinfo.cols.protocol = proto_systcpda_smc.name
 	
-	local subtree = tree:add(proto_systcpda_smc, buffer)
+	local subtree = tree:add(proto_systcpda_smc, buffer())
 
     local extension_length = systcpda_extensionlen().value - 4
     local payload_length = systcpda_payloadlen().value

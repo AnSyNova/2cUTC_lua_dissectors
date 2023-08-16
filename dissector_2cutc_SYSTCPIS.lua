@@ -44,7 +44,7 @@ function proto_systcpis.dissector(buffer, pinfo, tree)
 	
 	pinfo.cols.protocol = proto_systcpis.name
 
-    local subtree = tree:add(proto_systcpis, buffer, "Component SYSTCPIS")
+    local subtree = tree:add(proto_systcpis, buffer(), "Component SYSTCPIS")
 
 	-- CTRACE begin length field
 	local ctrace_len = buffer(0, 2):uint()

@@ -44,7 +44,7 @@ function proto_csqx.dissector(buffer, pinfo, tree)
 	
 	pinfo.cols.protocol = proto_csqx.name
 
-    local subtree = tree:add(proto_csqx, buffer)
+    local subtree = tree:add(proto_csqx, buffer())
 
 	-- CTRACE begin length field
 	local ctrace_len = buffer(0, 2):uint()

@@ -95,7 +95,7 @@ function proto_systcpda.dissector(buffer, pinfo, tree)
 	
 	pinfo.cols.protocol = proto_systcpda.name
 
-    local subtree = tree:add(proto_systcpda, buffer)
+    local subtree = tree:add(proto_systcpda, buffer())
 
 	-- get 2cUTC derived information from higher up
 	local extension = _2cutc_extension().range

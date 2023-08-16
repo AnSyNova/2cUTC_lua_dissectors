@@ -77,7 +77,7 @@ function proto_gsksrvr.dissector(buffer, pinfo, tree)
 	
 	pinfo.cols.protocol = proto_gsksrvr.name
 
-    local subtree = tree:add(proto_gsksrvr, buffer)
+    local subtree = tree:add(proto_gsksrvr, buffer())
 
 	-- get 2cUTC derived information from higher up
 	local extension = _2cutc_extension().range

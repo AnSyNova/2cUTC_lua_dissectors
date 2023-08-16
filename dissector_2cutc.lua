@@ -82,7 +82,7 @@ function proto_2cutc.dissector(buffer, pinfo, tree)
 	
 	pinfo.cols.protocol = proto_2cutc.name
 
-    local subtree = tree:add(proto_2cutc, buffer, "2cUTC Header")
+    local subtree = tree:add(proto_2cutc, buffer(), "2cUTC Header")
 
     subtree:add(_2cutc_eyecatcher, buffer(0, 5), buffer(0, 5):string())
 
