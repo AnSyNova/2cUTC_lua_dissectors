@@ -134,7 +134,7 @@ function proto_systcpda.dissector(buffer, pinfo, tree)
 	-- see above, special data inserted by 2cUTC
 	pinfo.cols.info:append(" " .. string.upper(extension_type))
 	if extension_type == "smc" then
-		Dissector.get("systcpda_smc"):call(buffer(112, ctrace_len - 112):tvb(), pinfo, subtree)
+		Dissector.get("systcpda_smc"):call(buffer(112, math.min(length, ctrace_len) - 112):tvb(), pinfo, subtree)
 	else
 		subtree:add("Unknown extension type, cannot dissect:")
 		subtree:add(systcpda_extension, buffer(112, ctrace_len - 112))
@@ -142,7 +142,9 @@ function proto_systcpda.dissector(buffer, pinfo, tree)
 	end
 
 	-- CTRACE end length field
+	if length == ctrace_len then
 	subtree:add(buffer(ctrace_len - 2, 2), "Length repeated: " .. buffer(ctrace_len - 2, 2):uint())
+	end
 end
 
 function ztod_2_unix(ztod)
