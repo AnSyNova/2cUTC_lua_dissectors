@@ -90,20 +90,7 @@ function proto_2cutc.dissector(buffer, pinfo, tree)
 
 	subtree:add(_2cutc_xlen, buffer(6, 2), buffer(6, 2):uint())
 
-	-- handle legacy extensions, this code can be removed sometime soon
     local effxlen = buffer(5, 3):uint()
-	if effxlen == 2105376 then
-		effxlen = 48
-		testlen = buffer(16, 2):uint()
-		if (16 + testlen + 2) < length then
-			if testlen == buffer(16 + testlen - 2, 2):uint() then
-				effxlen = 0
-			end
-		end
-	end
-	if effxlen ~=  buffer(6, 2):uint() then
-		subtree:add("Effective extension length: " .. effxlen)
-	end
 
 	subtree:add(_2cutc_component, buffer(8, 8),  buffer(8, 8):string())
 
@@ -113,12 +100,13 @@ function proto_2cutc.dissector(buffer, pinfo, tree)
 	end
 
 	-- check buffer for validity
+	strict = false
 	local err_text = ""
 	local ctrace_len1 = buffer(16 + effxlen, 2):uint()
 	if 16 + effxlen + ctrace_len1 > length then
-		err_text = "buffer too long"
-	elseif 16 + effxlen + ctrace_len1 < length then
 		err_text = "buffer too short"
+	elseif 16 + effxlen + ctrace_len1 < length then
+		err_text = "buffer too long"
 	else
 		local ctrace_len2 = buffer(16 + effxlen + ctrace_len1 - 2, 2):uint()
 		if ctrace_len1 ~= ctrace_len2 then
@@ -141,7 +129,7 @@ function proto_2cutc.dissector(buffer, pinfo, tree)
 	end
 	
 	-- If no errors, invoke the dissector.
-	if err_text == "" then
+	if not strict or err_text == "" then
 		pinfo.cols.info = "2CUTC " .. string.upper(diss_name)
 		diss:call(buffer(16 + effxlen):tvb(), pinfo, tree)
 		return
