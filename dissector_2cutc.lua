@@ -136,10 +136,8 @@ function proto_2cutc.dissector(buffer, pinfo, tree)
 	
 	-- If no errors, invoke the dissector.
 	if not strict or err_text == "" then
-		if err_text == "" then
-			pinfo.cols.info = "2CUTC " .. string.upper(diss_name)
-		else
-			pinfo.cols.info = "2CUTC " .. string.upper(diss_name) .. " " .. err_text
+		pinfo.cols.info = "2CUTC " .. string.upper(diss_name)
+		if err_text ~= "" then
 			subtree:add("WARNING: " .. err_text)
 		end
 		diss:call(buffer(16 + effxlen):tvb(), pinfo, tree)

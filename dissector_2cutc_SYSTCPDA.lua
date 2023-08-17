@@ -133,6 +133,7 @@ function proto_systcpda.dissector(buffer, pinfo, tree)
 
 	-- see above, special data inserted by 2cUTC
 	pinfo.cols.info:append(" " .. string.upper(extension_type))
+	
 	if extension_type == "smc" then
 		Dissector.get("systcpda_smc"):call(buffer(112, math.min(length, ctrace_len) - 112):tvb(), pinfo, subtree)
 	else

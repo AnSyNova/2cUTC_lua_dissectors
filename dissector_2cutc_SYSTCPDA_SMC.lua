@@ -68,6 +68,8 @@ local systcpda_extensionlen = Field.new("systcpda.extensionlen")
 local systcpda_payloadlen = Field.new("systcpda.payloadlen")
 local systcpda_entid = Field.new("systcpda.entid")
 
+local frame_interface_name = Field.new("frame.interface_name")
+
 --DISSECTOR
 --DISSECTOR
 --DISSECTOR
@@ -84,31 +86,77 @@ function proto_systcpda_smc.dissector(buffer, pinfo, tree)
     local extension_length = systcpda_extensionlen().value - 4
     local payload_length = systcpda_payloadlen().value
 
-	-- dissect
-	-- add to subtree here
+    local interface_name = frame_interface_name().value
 
-    -- Show the smc_extension_header as a big block (if desired)
-    subtree:add(systcpda_smc_extension_header, buffer(0, extension_length))
+    if string.sub(interface_name, 1, 6) == "EZAISM" then
 
-    -- Dissect the smc_extension_header
-    subtree:add(systcpda_smc_con_lcl, buffer(32, 4))
-    subtree:add(systcpda_smc_con_rmt, buffer(36, 4))
-    subtree:add(systcpda_smc_grp_lcl, buffer(56, 8))
-    subtree:add(systcpda_smc_grp_rmt, buffer(40, 8))
-    subtree:add(systcpda_smc_qp_lcl, buffer(75, 3))
-    subtree:add(systcpda_smc_qp_rmt, buffer(72, 3))
+	    -- dissect SMC-D
+	    -- add to subtree here
 
-   	-- Show the smc_payload as a big block (if desired)
-    subtree:add(systcpda_smc_payload, buffer(extension_length, payload_length))
+        subtree:add("SMC-D")
+        pinfo.cols.info:append("-D")
 
-    -- Dissect the smc_payload
-    local payload = buffer( extension_length)
+        -- Show the smc_extension_header as a big block (if desired)
+        subtree:add(systcpda_smc_extension_header, buffer(0, extension_length))
 
-    subtree:add(systcpda_smc_llc_func, payload(0, 1))
-    subtree:add(systcpda_smc_llc_len, payload(1, 2))
-    subtree:add(systcpda_smc_llc_flg, payload(3, 1))
-    subtree:add(systcpda_smc_llc_lnkid, payload(4, 1))
-    subtree:add(systcpda_smc_llc_rsncd, payload(5, 4))
+        -- Dissect the smc_extension_header
+        subtree:add(systcpda_smc_con_lcl, buffer(32, 4))
+        subtree:add(systcpda_smc_con_rmt, buffer(36, 4))
+        subtree:add(systcpda_smc_grp_lcl, buffer(56, 8))
+        subtree:add(systcpda_smc_grp_rmt, buffer(40, 8))
+        subtree:add(systcpda_smc_qp_lcl, buffer(75, 3))
+        subtree:add(systcpda_smc_qp_rmt, buffer(72, 3))
 
+   	    -- Show the smc_payload as a big block (if desired)
+        subtree:add(systcpda_smc_payload, buffer(extension_length, payload_length))
+
+        -- Dissect the smc_payload
+        local payload = buffer( extension_length)
+
+    elseif string.sub(interface_name, 1, 5) == "EZARI" then
+
+   	    -- dissect SMC-R
+	    -- add to subtree here
+
+        subtree:add("SMC-R")
+        pinfo.cols.info:append("-R")
+
+        -- Show the smc_extension_header as a big block (if desired)
+        subtree:add(systcpda_smc_extension_header, buffer(0, extension_length))
+
+        -- Dissect the smc_extension_header
+        subtree:add(systcpda_smc_con_lcl, buffer(32, 4))
+        subtree:add(systcpda_smc_con_rmt, buffer(36, 4))
+        subtree:add(systcpda_smc_grp_lcl, buffer(56, 8))
+        subtree:add(systcpda_smc_grp_rmt, buffer(40, 8))
+        subtree:add(systcpda_smc_qp_lcl, buffer(75, 3))
+        subtree:add(systcpda_smc_qp_rmt, buffer(72, 3))
+
+   	    -- Show the smc_payload as a big block (if desired)
+        subtree:add(systcpda_smc_payload, buffer(extension_length, payload_length))
+
+        -- Dissect the smc_payload
+        local payload = buffer(extension_length)
+
+        subtree:add(systcpda_smc_llc_func, payload(0, 1))
+        subtree:add(systcpda_smc_llc_len, payload(1, 2))
+        subtree:add(systcpda_smc_llc_flg, payload(3, 1))
+        subtree:add(systcpda_smc_llc_lnkid, payload(4, 1))
+        subtree:add(systcpda_smc_llc_rsncd, payload(5, 4))
+
+    else
+
+       	-- dissect SMC-R
+    	-- add to subtree here
+
+        subtree:add("SMC-?")
+
+        -- Show the smc_extension_header as a big block (if desired)
+        subtree:add(systcpda_smc_extension_header, buffer(0, extension_length))
+
+       	-- Show the smc_payload as a big block (if desired)
+        subtree:add(systcpda_smc_payload, buffer(extension_length, payload_length))
+
+    end
     
 end
