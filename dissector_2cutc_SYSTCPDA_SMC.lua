@@ -31,8 +31,12 @@ local systcpda_smc_con_lcl = ProtoField.uint32("systcpda_smc.con_lcl", "Local Co
 local systcpda_smc_con_rmt = ProtoField.uint32("systcpda_smc.con_rmt", "Remote ConnID", base.HEX)
 local systcpda_smc_grp_lcl = ProtoField.uint64("systcpda_smc.grp_lcl", "Local Gid", base.HEX)
 local systcpda_smc_grp_rmt = ProtoField.uint64("systcpda_smc.grp_rmt", "Remote Gid", base.HEX)
-local systcpda_smc_qp_lcl = ProtoField.uint24("systcpda_smc.qp_lcl", "Local QueuePair", base.HEX)
-local systcpda_smc_qp_rmt = ProtoField.uint24("systcpda_smc.qp_rmt", "Remote QueuePair", base.HEX)
+local systcpda_smc_cx_lcl = ProtoField.uint8("systcpda_smc.cx_lcl", "Local Conn Index")
+local systcpda_smc_cx_rmt = ProtoField.uint8("systcpda_smc.cx_rmt", "Remote Conn Index")
+local systcpda_smc_prod_csr = ProtoField.uint64("systcpda_smc.prod_csr", "Producer Cursor")
+local systcpda_smc_cons_csr = ProtoField.uint64("systcpda_smc.cons_csr", "Consumer Cursor")
+local systcpda_smc_prod_flags = ProtoField.uint8("systcpda_smc.prod_flags", "Producer Flags",base.HEX)
+local systcpda_smc_con_state = ProtoField.uint8("systcpda_smc.con_state", "Connection State",base.HEX)
 
 local systcpda_smc_payload = ProtoField.bytes("systcpda_smc.payload", "**Payload")
 
@@ -51,8 +55,12 @@ proto_systcpda_smc.fields = {
     systcpda_smc_con_rmt,
     systcpda_smc_grp_lcl,
     systcpda_smc_grp_rmt,
-    systcpda_smc_qp_lcl,
-    systcpda_smc_qp_rmt,
+    systcpda_smc_cx_lcl,
+    systcpda_smc_cx_rmt,
+	systcpda_smc_prod_csr,
+	systcpda_smc_cons_csr,
+    systcpda_smc_prod_flags,
+    systcpda_smc_con_state,
 
     systcpda_smc_payload,
 
@@ -100,12 +108,16 @@ function proto_systcpda_smc.dissector(buffer, pinfo, tree)
         subtree:add(systcpda_smc_extension_header, buffer(0, extension_length))
 
         -- Dissect the smc_extension_header
-        subtree:add(systcpda_smc_con_lcl, buffer(32, 4))
-        subtree:add(systcpda_smc_con_rmt, buffer(36, 4))
-        subtree:add(systcpda_smc_grp_lcl, buffer(56, 8))
-        subtree:add(systcpda_smc_grp_rmt, buffer(40, 8))
-        subtree:add(systcpda_smc_qp_lcl, buffer(75, 3))
-        subtree:add(systcpda_smc_qp_rmt, buffer(72, 3))
+        subtree:add(systcpda_smc_con_lcl, buffer(28, 4))
+        subtree:add(systcpda_smc_con_rmt, buffer(32, 4))
+        subtree:add(systcpda_smc_grp_lcl, buffer(52, 8))
+        subtree:add(systcpda_smc_grp_rmt, buffer(36, 8))
+        subtree:add(systcpda_smc_cx_lcl, buffer(19, 1))
+        subtree:add(systcpda_smc_cx_rmt, buffer(18, 1))
+		subtree:add(systcpda_smc_prod_csr, buffer(0, 8))
+		subtree:add(systcpda_smc_cons_csr, buffer(8, 8))
+		subtree:add(systcpda_smc_prod_flags, buffer(16, 1))
+		subtree:add(systcpda_smc_con_state, buffer(17, 1))
 
    	    -- Show the smc_payload as a big block (if desired)
         subtree:add(systcpda_smc_payload, buffer(extension_length, payload_length))
