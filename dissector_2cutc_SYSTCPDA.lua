@@ -39,6 +39,7 @@ local systcpda_dstip = ProtoField.uint32("systcpda.dstip", "Destination IP ", ba
 local systcpda_srcport = ProtoField.uint16("systcpda.srcport", "Source Port")
 local systcpda_dstport = ProtoField.uint16("systcpda.dstport", "Destination Port")
 local systcpda_recnum = ProtoField.uint16("systcpda.recnum", "Record number")
+local systcpda_proto = ProtoField.uint8("systcpda.proto", "Protocol")
 local systcpda_vlanid = ProtoField.uint16("systcpda.vlanid", "VLAN ID")
 local systcpda_intfidx = ProtoField.uint32("systcpda.intfidx", "Interface index")
 
@@ -64,6 +65,7 @@ proto_systcpda.fields = {
 	systcpda_srcport,
 	systcpda_dstport,
 	systcpda_recnum,
+	systcpda_proto,      -- 06 = TCP ,
 	systcpda_vlanid,
 	systcpda_intfidx,
 
@@ -125,6 +127,7 @@ function proto_systcpda.dissector(buffer, pinfo, tree)
 	subtree:add(systcpda_srcport, buffer(80, 2))
     subtree:add(systcpda_dstport, buffer(82, 2))
     subtree:add(systcpda_recnum, buffer(84, 4))
+    subtree:add(systcpda_proto, buffer(89, 1))
     subtree:add(systcpda_vlanid, buffer(90, 2))
     subtree:add(systcpda_payloadlen, buffer(96, 4))
     subtree:add(systcpda_intfidx, buffer(100, 4))
