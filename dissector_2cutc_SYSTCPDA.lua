@@ -65,7 +65,7 @@ proto_systcpda.fields = {
 	systcpda_srcport,
 	systcpda_dstport,
 	systcpda_recnum,
-	systcpda_proto,      -- 06 = TCP , 252 = SMC-LLC 
+	systcpda_proto,      -- 06 = TCP , 252 = SMC-LLC - der muss weg 
 	systcpda_vlanid,
 	systcpda_intfidx,
 
@@ -80,7 +80,7 @@ proto_systcpda.fields = {
 local _2cutc_extension = Field.new("2cutc.extension")
 
 --[[
-The 2cUTC extension provided for the SYSTCPDA component(s):
+The 2cUTC extension provided for the SYSTCPDA componentxxx :
 
        00   01    02  03  04  05  06  07  08  09  0A    0B  0C  0D  0E  0F  ..  ..  
 0000   extension_type                         ...................
