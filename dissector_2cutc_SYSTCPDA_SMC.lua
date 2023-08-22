@@ -33,8 +33,15 @@ local systcpda_smc_grp_lcl = ProtoField.uint64("systcpda_smc.grp_lcl", "Local Gi
 local systcpda_smc_grp_rmt = ProtoField.uint64("systcpda_smc.grp_rmt", "Remote Gid", base.HEX)
 local systcpda_smc_cx_lcl = ProtoField.uint8("systcpda_smc.cx_lcl", "Local Conn Index")
 local systcpda_smc_cx_rmt = ProtoField.uint8("systcpda_smc.cx_rmt", "Remote Conn Index")
+local systcpda_smc_qp_lcl = ProtoField.uint8("systcpda_smc.cx_lcl", "Local Queue Pair ")
+local systcpda_smc_qp_rmt = ProtoField.uint8("systcpda_smc.cx_rmt", "Remote Queue Pair")
+local systcpda_smc_prod_flags = ProtoField.uint8("systcpda_smc.prod_flags", "Producer Flags",base.HEX)
 local systcpda_smc_prod_csr = ProtoField.uint64("systcpda_smc.prod_csr", "Producer Cursor")
+local systcpda_smc_prod_csr_h = ProtoField.uint32("systcpda_smc.prod_csr_h", "ProdCursor_high")
+local systcpda_smc_prod_csr_l = ProtoField.uint32("systcpda_smc.prod_csr_l", "ProdCursor_low")
 local systcpda_smc_cons_csr = ProtoField.uint64("systcpda_smc.cons_csr", "Consumer Cursor")
+local systcpda_smc_cons_csr_h = ProtoField.uint32("systcpda_smc.cons_csr_h", "ConsCursor_high")
+local systcpda_smc_cons_csr_l = ProtoField.uint32("systcpda_smc.cons_csr_l", "ConsCursor_low")
 local systcpda_smc_prod_flags = ProtoField.uint8("systcpda_smc.prod_flags", "Producer Flags",base.HEX)
 local systcpda_smc_con_state = ProtoField.uint8("systcpda_smc.con_state", "Connection State",base.HEX)
 
@@ -42,9 +49,9 @@ local systcpda_smc_payload = ProtoField.bytes("systcpda_smc.payload", "**Payload
 
 local systcpda_smc_llc_func = ProtoField.uint8("systcpda_smc.llc_func", "LLC Function")
 local systcpda_smc_llc_len = ProtoField.uint16("systcpda_smc.llc_len", "LLC length")
-local systcpda_smc_llc_flg = ProtoField.uint8("systcpda_smc.llc_flg", "LLC flags")
+local systcpda_smc_llc_flg = ProtoField.uint8("systcpda_smc.llc_flg", "LLC flags",base.HEX)
 local systcpda_smc_llc_lnkid = ProtoField.uint8("systcpda_smc.llc_lnkid", "LLC LinkId")
-local systcpda_smc_llc_rsncd = ProtoField.uint32("systcpda_smc.llc_rsncd", "LLC Reasoncode", base.HEX)
+local systcpda_smc_llc_rsncd = ProtoField.uint24("systcpda_smc.llc_rsncd", "LLC Reasoncode", base.HEX)
 
 proto_systcpda_smc.fields = {  
     systcpda_smc_extension_length,
@@ -58,12 +65,18 @@ proto_systcpda_smc.fields = {
     systcpda_smc_cx_lcl,
     systcpda_smc_cx_rmt,
 	systcpda_smc_prod_csr,
+	systcpda_smc_prod_csr_h,
+	systcpda_smc_prod_csr_l,
 	systcpda_smc_cons_csr,
+	systcpda_smc_cons_csr_h,
+	systcpda_smc_cons_csr_l,
     systcpda_smc_prod_flags,
     systcpda_smc_con_state,
-
     systcpda_smc_payload,
 
+    systcpda_smc_qp_lcl,
+    systcpda_smc_qp_rmt,
+    smc_proto,
     systcpda_smc_llc_func,
     systcpda_smc_llc_len,
     systcpda_smc_llc_flg,
@@ -75,6 +88,7 @@ proto_systcpda_smc.fields = {
 local systcpda_extensionlen = Field.new("systcpda.extensionlen")
 local systcpda_payloadlen = Field.new("systcpda.payloadlen")
 local systcpda_entid = Field.new("systcpda.entid")
+local systcpda_proto = Field.new("systcpda.proto")
 
 local frame_interface_name = Field.new("frame.interface_name")
 
@@ -115,7 +129,11 @@ function proto_systcpda_smc.dissector(buffer, pinfo, tree)
         subtree:add(systcpda_smc_cx_lcl, buffer(19, 1))
         subtree:add(systcpda_smc_cx_rmt, buffer(18, 1))
 		subtree:add(systcpda_smc_prod_csr, buffer(0, 8))
+		subtree:add(systcpda_smc_prod_csr_h, buffer(0, 4))
+		subtree:add(systcpda_smc_prod_csr_l, buffer(4, 4))
 		subtree:add(systcpda_smc_cons_csr, buffer(8, 8))
+		subtree:add(systcpda_smc_cons_csr_h, buffer(8, 4))
+		subtree:add(systcpda_smc_cons_csr_l, buffer(12, 4))
 		subtree:add(systcpda_smc_prod_flags, buffer(16, 1))
 		subtree:add(systcpda_smc_con_state, buffer(17, 1))
 
@@ -131,30 +149,29 @@ function proto_systcpda_smc.dissector(buffer, pinfo, tree)
 	    -- add to subtree here
 
         subtree:add("SMC-R")
-        pinfo.cols.info:append("-R")
+        pinfo.cols.info:append("-")
 
         -- Show the smc_extension_header as a big block (if desired)
         subtree:add(systcpda_smc_extension_header, buffer(0, extension_length))
 
         -- Dissect the smc_extension_header
-        subtree:add(systcpda_smc_con_lcl, buffer(32, 4))
-        subtree:add(systcpda_smc_con_rmt, buffer(36, 4))
-        subtree:add(systcpda_smc_grp_lcl, buffer(56, 8))
-        subtree:add(systcpda_smc_grp_rmt, buffer(40, 8))
-        subtree:add(systcpda_smc_qp_lcl, buffer(75, 3))
-        subtree:add(systcpda_smc_qp_rmt, buffer(72, 3))
+        subtree:add(systcpda_smc_con_lcl, buffer(28, 4))
+        subtree:add(systcpda_smc_con_rmt, buffer(32, 4))
+        subtree:add(systcpda_smc_grp_lcl, buffer(60, 8))
+        subtree:add(systcpda_smc_grp_rmt, buffer(44, 8))
+        subtree:add(systcpda_smc_qp_lcl, buffer(71, 3))
+        subtree:add(systcpda_smc_qp_rmt, buffer(68, 3))
 
    	    -- Show the smc_payload as a big block (if desired)
         subtree:add(systcpda_smc_payload, buffer(extension_length, payload_length))
 
         -- Dissect the smc_payload
         local payload = buffer(extension_length)
-
         subtree:add(systcpda_smc_llc_func, payload(0, 1))
         subtree:add(systcpda_smc_llc_len, payload(1, 2))
         subtree:add(systcpda_smc_llc_flg, payload(3, 1))
         subtree:add(systcpda_smc_llc_lnkid, payload(4, 1))
-        subtree:add(systcpda_smc_llc_rsncd, payload(5, 4))
+        subtree:add(systcpda_smc_llc_rsncd, payload(6, 3))
 
     else
 
