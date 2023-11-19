@@ -12,6 +12,8 @@ If you want to know more about AnSyNova GmbH: [https://www.ansynova.com/](https:
 
 You need Wireshark on your PC. Your goal is to analyze .pcapng trace files produced by 2cUTC on this PC or from somewhere else, which contain exported CTRACEs.
 
+One feature, the dissection of SYSTCPIP Option "TCP" data, works best with a wireshark version after or including version 4.2.0, which contains a fix submitted by us that was needed to display embedded IP and TCP headers correctly.
+
 **PREPARATION**
 
 To get these dissectors onto your PC:
