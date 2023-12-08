@@ -38,6 +38,7 @@ local gsksrvr_thread = ProtoField.uint32("gsksrvr.thread", "Thread")
 local gsksrvr_desc = ProtoField.uint32("gsksrvr.desc", "Description", base.HEX)
 local gsksrvr_rsv6 = ProtoField.bytes("gsksrvr.rsv6", "?")
 local gsksrvr_text = ProtoField.string("gsksrvr.text", "Text")
+local gsksrvr_text2 = ProtoField.string("gsksrvr.text2", "Text2")
 
 proto_gsksrvr.fields = {  
 	gsksrvr_len,
@@ -50,7 +51,8 @@ proto_gsksrvr.fields = {
 	gsksrvr_thread,
 	gsksrvr_desc,
 	gsksrvr_rsv6,
-	gsksrvr_text
+	gsksrvr_text,
+	gsksrvr_text2
 }
 
 proto_gsksrvr.experts = {
@@ -129,14 +131,23 @@ function proto_gsksrvr.dissector(buffer, pinfo, tree)
 
 	-- translate all 0x00 values to EBCDIC blank 0x40
 	local bufbytes = buftemp:bytes()
+
+	local firstHexZero = 0
 	for i = 0, bufbytes:len() - 1 do
-		if bufbytes:get_index(i) == 0 then
-			bufbytes:set_index(i, 64)
+		if bufbytes:get_index(i) == 0 then do
+				if firstHexZero == 0 then 
+					firstHexZero = i
+					bufbytes:set_index(i, 64)
+				end
+			end
 		end
 	end
 
-	local bufnew = ByteArray.tvb(bufbytes)
-	subtree:add(bufnew(0), "Complete text field: " .. bufnew(0):string(ENC_EBCDIC))
+	local buftemp2 = ByteArray.tvb(bufbytes)
+	subtree:add_packet_field(gsksrvr_text2, buftemp2:range(firstHexZero + 1, buftemp:len() - firstHexZero - 1), ENC_EBCDIC)
+
+	local bufall = ByteArray.tvb(bufbytes)
+	subtree:add(bufall(0), "Complete text field: " .. bufall(0):string(ENC_EBCDIC))
 
 	-- CTRACE end length field
 	subtree:add(buffer(ctrace_len - 2, 2), "Length repeated: " .. buffer(ctrace_len - 2, 2):uint())
