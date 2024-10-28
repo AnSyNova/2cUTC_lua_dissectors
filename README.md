@@ -32,6 +32,12 @@ _FIRST_
 
 copy these luas to `C:\Users\<username>\AppData\Roaming\Wireshark\plugins`
 
+Note: The following steps ("EITHER", or "OR") are no longer needed. 2cUTC will use
+"-o ""uat:user_dlts:\""User 0 (DLT=147)\"",\""2cutc\"",\""0\"",\""\"",\""0\"",\""\"""""
+as start option for wireshark.exe to set the USER_DLT 147 to "2cutc" automagically.
+If this for some reason fails, you may of course use the following instructions to
+set them manually.
+
 _THEN **EITHER**_
 
 go to WireShark / Options / Protocols and select DLT-USER - Add an entry to the table  with DLT=147.
