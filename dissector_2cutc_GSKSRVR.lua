@@ -39,6 +39,7 @@ local gsksrvr_desc = ProtoField.uint32("gsksrvr.desc", "Description", base.HEX)
 local gsksrvr_rsv6 = ProtoField.bytes("gsksrvr.rsv6", "?")
 local gsksrvr_text = ProtoField.string("gsksrvr.text", "Text")
 local gsksrvr_text2 = ProtoField.string("gsksrvr.text2", "Text2")
+local gsksrvr_certificate = ProtoField.bytes("gsksrvr.certificate", "X.509 Certificate")
 
 proto_gsksrvr.fields = {  
 	gsksrvr_len,
@@ -52,7 +53,8 @@ proto_gsksrvr.fields = {
 	gsksrvr_desc,
 	gsksrvr_rsv6,
 	gsksrvr_text,
-	gsksrvr_text2
+	gsksrvr_text2,
+	gsksrvr_certificate
 }
 
 proto_gsksrvr.experts = {
@@ -134,17 +136,26 @@ function proto_gsksrvr.dissector(buffer, pinfo, tree)
 
 	local firstHexZero = 0
 	for i = 0, bufbytes:len() - 1 do
-		if bufbytes:get_index(i) == 0 then do
+		if bufbytes:get_index(i) == 0 then
 				if firstHexZero == 0 then 
 					firstHexZero = i
 					bufbytes:set_index(i, 64)
 				end
-			end
 		end
 	end
 
 	local buftemp2 = ByteArray.tvb(bufbytes)
-	subtree:add_packet_field(gsksrvr_text2, buftemp2:range(firstHexZero + 1, buftemp:len() - firstHexZero - 1), ENC_EBCDIC)
+	subtree:add_packet_field(gsksrvr_text2, buftemp2:range(firstHexZero + 1, buftemp2:len() - firstHexZero - 1), ENC_EBCDIC)
+
+	-- "Encoded X.509" c5 95 83 96 84 85 84 40 e7 4b f5 f0 f9
+	local bufstring2 = buftemp2(0, -1):raw()
+	i, j = string.find(bufstring2, "\xC5\x95\x83\x96\x84\x85\x84\x40\xE7\x4B\xF5\xF0\xF9")
+	if i ~= nil then
+		local buftemp3 = buftemp2:range(firstHexZero + 30, -1)
+		clen = buftemp3(3, 2):uint() + 4
+		subtree:add(gsksrvr_certificate, buftemp3:range(1, clen))
+		return
+	end
 
 	local bufall = ByteArray.tvb(bufbytes)
 	subtree:add(bufall(0), "Complete text field: " .. bufall(0):string(ENC_EBCDIC))
