@@ -4,9 +4,9 @@ A set of Wireshark .lua scripts to dissect 2cUTC CTRACEs (from z/OS)
 
 **WHAT IS A 2cUTC CTRACE?**
 
-If you want to know more about 2cUTC: Visit [https://2cutc.ansynova.eu/](https://2cutc.ansynova.eu/)
+If you want to know more about 2cUTC: Visit [https://2cutc.ansynova.eu/](https://2cutc.ansynova.eu/index.php/en/home/)
 
-If you want to know more about AnSyNova GmbH: [https://www.ansynova.com/](https://www.ansynova.com/)
+If you want to know more about AnSyNova GmbH: [https://www.ansynova.com/](https://ansynova.ansynova.eu/index.php/en/how-to-contact-with/)
 
 **PREREQUISITES**
 
