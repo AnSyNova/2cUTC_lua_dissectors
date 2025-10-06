@@ -1,6 +1,6 @@
 # 2cUTC_dissectors
 
-A set of Wireshark .lua scripts to dissect 2cUTC CTRACEs
+A set of Wireshark .lua scripts to dissect 2cUTC CTRACEs (from z/OS)
 
 **WHAT IS A 2cUTC CTRACE?**
 
