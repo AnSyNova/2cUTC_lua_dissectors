@@ -36,9 +36,9 @@ Note: If you do not copy these luas into the plugins directory, then the followi
 steps where you refer to "2cutc" as a dissector when setting a User DLT will result
 in an error when Wireshark is started.
 
-Note: The following steps ("EITHER", or "OR") are no longer needed. 2cUTC will use
-"-o ""uat:user_dlts:\""User 0 (DLT=147)\"",\""2cutc\"",\""0\"",\""\"",\""0\"",\""\"""""
-as start option for wireshark.exe to set the USER_DLT 147 to "2cutc" automagically.
+Note: The following steps ("EITHER", or "OR") are no longer needed. 2cUTC will use the command
+line parameter "-o ""uat:user_dlts:\""User 0 (DLT=147)\"",\""2cutc\"",\""0\"",\""\"",\""0\"",\""\"""""
+as the start option for wireshark.exe to set the USER_DLT 147 to "2cutc" automagically.
 If this for some reason fails, you may of course use the following instructions to
 set them manually.
 
